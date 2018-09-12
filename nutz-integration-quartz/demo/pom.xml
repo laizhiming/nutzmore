@@ -4,16 +4,17 @@
 	<groupId>net.wendal</groupId>
 	<artifactId>nutz-quartz-demo</artifactId>
 	<packaging>war</packaging>
-	<version>1.r.59-SNAPSHOT</version>
+	<version>1.r.67-SNAPSHOT</version>
 	<name>nutzdemo Maven Webapp</name>
 	<url>http://maven.apache.org</url>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<nutz.version>1.r.67-SNAPSHOT</nutz.version>
 	</properties>
 	<repositories>
 		<repository>
 			<id>nutz-snapshots</id>
-			<url>http://maven.nutz.cn/nexus/content/repositories/snapshots</url>
+			<url>https://jfrog.nutz.cn/artifactory/snapshots</url>
 			<snapshots>
 				<enabled>true</enabled>
 				<updatePolicy>always</updatePolicy>
@@ -33,7 +34,13 @@
 		<dependency>
 			<groupId>org.nutz</groupId>
 			<artifactId>nutz</artifactId>
-			<version>1.r.58</version>
+			<version>${nutz.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>3.1.0</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>mysql</groupId>
@@ -53,12 +60,11 @@
 		<dependency>
 			<groupId>org.nutz</groupId>
 			<artifactId>nutz-integration-quartz</artifactId>
-			<version>1.r.58</version>
+			<version>${nutz.version}</version>
 		</dependency>
 	</dependencies>
 	<build>
-		<finalName>nutzdemo</finalName>
-
+		<finalName>nutz-quartz-demo</finalName>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>

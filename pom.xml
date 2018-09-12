@@ -1,18 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.nutz</groupId>
 	<artifactId>nutzmore</artifactId>
-	<version>1.r.59-SNAPSHOT</version>
+	<version>1.r.67-SNAPSHOT</version>
 	<name>nutzmore</name>
 	<description>Nutz, which is a collections of lightweight frameworks, each of them can be used independently</description>
 
-	<url>http://nutzam.com</url>
+	<url>https://nutzam.com</url>
 	<issueManagement>
 		<system>Github Issue</system>
 		<url>http://github.com/nutzam/nutzmore/issues</url>
 	</issueManagement>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<antlr4-runtime.version>4.7.1</antlr4-runtime.version>
+		<beetl.version>2.8.7</beetl.version>
+		<commons-lang3.version>3.7</commons-lang3.version>
+		<druid.version>1.1.10</druid.version>
+		<ehcache.version>2.10.5</ehcache.version>
+		<freemarker.version>2.3.28</freemarker.version>
+		<h2.version>1.4.197</h2.version>
+		<itext-asian.version>5.2.0</itext-asian.version>
+		<itextpdf.version>5.5.13</itextpdf.version>
+		<javax.websocket-api.version>1.1</javax.websocket-api.version>
+		<jedis.version>2.9.0</jedis.version>
+		<jetbrick-template.version>2.1.6</jetbrick-template.version>
+		<log4j.version>1.2.17</log4j.version>
+		<mysql-connector-java.version>5.1.47</mysql-connector-java.version>
+		<netty-all.version>4.1.25.Final</netty-all.version>
+		<poi.version>4.0.0</poi.version>
+		<shiro-ehcache.version>1.3.2</shiro-ehcache.version>
+		<slf4j-log4j12.version>1.7.25</slf4j-log4j12.version>
+		<velocity.version>1.7</velocity.version>
+	</properties>
 	<licenses>
 		<license>
 			<name>The Apache Software License, Version 2.0</name>
@@ -47,7 +68,7 @@
 	<repositories>
 		<repository>
 			<id>nutzcn-snapshots</id>
-			<url>http://maven.nutz.cn/nexus/content/repositories/snapshots</url>
+			<url>https://jfrog.nutz.cn/artifactory/snapshots</url>
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
@@ -57,7 +78,7 @@
 		<dependency>
 			<groupId>org.nutz</groupId>
 			<artifactId>nutz</artifactId>
-			<version>1.r.59-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
 
@@ -97,44 +118,65 @@
 	</build>
 	<packaging>pom</packaging>
 	<modules>
-		<module>nutz-plugins-sfntly</module>
-		<module>nutz-integration-spring</module>
-		<module>nutz-integration-jcache</module>
-		<module>nutz-integration-jsr303</module>
-		<module>nutz-integration-quartz</module>
-		<module>nutz-integration-dwr</module>
-		<module>nutz-integration-jsf</module>
-		<module>nutz-integration-shiro</module>
+		<module>nutz-integration-activiti</module>
+		<module>nutz-integration-bex5</module>
+		<module>nutz-integration-cxf</module>
 		<module>nutz-integration-dubbo</module>
-		<module>nutz-integration-jsch</module>
-		<module>nutz-integration-struts2</module>
-		<module>nutz-integration-zbus</module>
+		<module>nutz-integration-dwr</module>
+		<module>nutz-integration-grpc</module>
+		<module>nutz-integration-hasor</module>
 		<module>nutz-integration-hessian</module>
+		<module>nutz-integration-jedis</module>
+		<module>nutz-integration-jedisque</module>
+		<module>nutz-integration-json4excel</module>
+		<module>nutz-integration-neo4j</module>
+		<module>nutz-integration-nettice</module>
+		<module>nutz-integration-quartz</module>
+		<module>nutz-integration-rabbitmq</module>
+		<module>nutz-integration-shiro</module>
+		<module>nutz-integration-spring</module>
+		<module>nutz-integration-zbus</module>
+		<module>nutz-plugins-apidoc</module>
+		<module>nutz-plugins-cache</module>
+		<module>nutz-plugins-daocache</module>
+		<module>nutz-plugins-daomapping</module>
+		<module>nutz-plugins-dict</module>
+		<module>nutz-plugins-event</module>
+		<module>nutz-plugins-hotplug</module>
+		<module>nutz-plugins-iocloader</module>
+		<module>nutz-plugins-ip2region</module>
+		<module>nutz-plugins-jqgrid</module>
+		<module>nutz-plugins-jsonrpc</module>
+		<module>nutz-plugins-mock</module>
+		<module>nutz-plugins-multiview</module>
+		<module>nutz-plugins-mongodb</module>
+		<module>nutz-plugins-ngrok</module>
+		<module>nutz-plugins-nop</module>
+		<module>nutz-plugins-profiler</module>
+		<module>nutz-plugins-protobuf</module>
+		<module>nutz-plugins-qrcode</module>
+		<module>nutz-plugins-sigar</module>
+		<module>nutz-plugins-slog</module>
+		<module>nutz-plugins-spring-boot-starter</module>
+		<module>nutz-plugins-sqlmanager</module>
+		<module>nutz-plugins-sqltpl</module>
+		<module>nutz-plugins-undertow</module>
 		<module>nutz-plugins-validation</module>
 		<module>nutz-plugins-views</module>
-		<module>nutz-plugins-multiview</module>
+		<module>nutz-plugins-websocket</module>
+		<module>nutz-plugins-wkcache</module>
 		<module>nutz-plugins-xmlentitymaker</module>
-		<module>nutz-plugins-iocloader</module>
-		<module>nutz-plugins-daocache</module>
-		<module>nutz-plugins-protobuf</module>
-		<module>nutz-plugins-sqltpl</module>
-		<module>nutz-plugins-secken</module>
-		<module>nutz-plugins-jsonrpc</module>
-		<module>nutz-plugins-sigar</module>
-		<module>nutz-plugins-jedis</module>
-		<module>nutz-plugins-mock</module>
-		<module>nutz-plugins-qrcode</module>
-        <module>nutz-plugins-nop</module>
-        <module>nutz-plugins-apidoc</module>
+		<module>nutz-plugins-zcron</module>
+		<module>nutz-plugins-zdoc</module>
+		<module>nutz-plugins-fiddler</module>
+		<module>nutz-plugins-jetty-client</module>
+		<module>nutz-plugins-xmlbind</module>
 	</modules>
-	<properties>
-		<nutz.version>1.r.58</nutz.version>
-	</properties>
 	<distributionManagement>
 		<snapshotRepository>
 			<id>nutzcn-snapshots</id>
 			<name>NutzCN snapshot repository</name>
-			<url>http://maven.nutz.cn/nexus/content/repositories/snapshots</url>
+			<url>https://jfrog.nutz.cn/artifactory/snapshots</url>
 		</snapshotRepository>
 
 		<repository>

@@ -1,7 +1,7 @@
 Nutz集成Quartz的插件
 ======================
 
-简介(可用性:生产)
+简介(可用性:生产,维护者:wendal)
 ==================================
 
 集成Quartz(计划任务/定时任务)的不二选择
@@ -12,7 +12,7 @@ Nutz集成Quartz的插件
 使用方法
 -------------------------
 
-* 添加quartz的jar, 支持2.x版本,建议用最新版
+* 添加quartz的jar, 支持2.2.1或以上的版本,建议用最新版
 * 在src或maven的resources目录下添加一个 quartz.properties
 * 在MainModule的IocBy中引用QuartzIocLoader
 * 在需要使用quartz的类中引用Scheduler即可
@@ -30,12 +30,20 @@ Nutz集成Quartz的插件
 
 	@IocBy(type=ComboIocProvider.class, args={"*js", "ioc/",
 										   "*anno", "net.wendal.nutzbook",
-										   "*org.nutz.integration.quartz.QuartzIocLoader"})
+										   "*quartz"})
 										   
 在Module或Service中引用Scheduler
 -----------------------------------------------
 
+Quartz的核心类Scheduler, 得到它,你几乎可以操作Quartz的一切
+
+	// 注入的方式
+	
 	@Inject Scheduler scheduler;
+	
+	// 或主动获取的方式
+	
+	Scheduler scheduler = ioc.get(Scheduler.class);
 	
 	
 任务加载类NutQuartzCronJobFactory(可选的)
@@ -56,7 +64,7 @@ Nutz集成Quartz的插件
 	cron.pkgs=net.wendal.nutzbook.quartz.job
 	
 
-详细用法请参考nutzbook中的相关描述
+详细用法可以参考nutzbook中的相关描述
 
 示例conf bean定义
 -----------------------
@@ -113,5 +121,9 @@ var ioc = {
 };
 ```
 
+Quartz Cron表达式简介
+============================================
+
+请参考 http://www.blogjava.net/javagrass/archive/2011/07/12/354134.html
 	
 	

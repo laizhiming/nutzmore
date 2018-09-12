@@ -3,12 +3,12 @@
 	<parent>
 		<groupId>org.nutz</groupId>
 		<artifactId>nutzmore</artifactId>
-		<version>1.r.59-SNAPSHOT</version>
+		<version>1.r.67-SNAPSHOT</version>
 	</parent>
 	<artifactId>nutz-plugins-views</artifactId>
 	<description>Nutz More Views</description>
 
-	<url>http://nutzam.com</url>
+	<url>https://nutzam.com</url>
 	<issueManagement>
 		<system>Github Issue</system>
 		<url>http://github.com/nutzam/nutzmore/issues</url>
@@ -57,14 +57,14 @@
 		<dependency>
 			<groupId>org.freemarker</groupId>
 			<artifactId>freemarker</artifactId>
-			<version>2.3.20</version>
+			<version>${freemarker.version}</version>
 			<scope>provided</scope>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.velocity</groupId>
 			<artifactId>velocity</artifactId>
-			<version>1.7</version>
+			<version>${velocity.version}</version>
 			<optional>true</optional>
 			<scope>provided</scope>
 		</dependency>
@@ -78,33 +78,41 @@
 		<dependency>
 			<groupId>org.thymeleaf</groupId>
 			<artifactId>thymeleaf</artifactId>
-			<version>3.0.0.RELEASE</version>
+			<version>3.0.9.RELEASE</version>
 			<optional>true</optional>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>nz.net.ultraq.thymeleaf</groupId>
 			<artifactId>thymeleaf-layout-dialect</artifactId>
-			<version>2.0.1</version>
+			<version>2.3.0</version>
 			<optional>true</optional>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.itextpdf</groupId>
 			<artifactId>itextpdf</artifactId>
-			<version>5.5.8</version>
+			<version>${itextpdf.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.itextpdf</groupId>
 			<artifactId>itext-asian</artifactId>
-			<version>5.2.0</version>
+			<version>${itext-asian.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.nutz</groupId>
 			<artifactId>nutz-plugins-sfntly</artifactId>
-			<version>1.r.59-SNAPSHOT</version>
+			<version>1.r.60</version>
+			<optional>true</optional>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.ibeetl</groupId>
+			<artifactId>beetl</artifactId>
+			<version>${beetl.version}</version>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 	<build>
@@ -143,7 +151,7 @@
 		<snapshotRepository>
 			<id>nutzcn-snapshots</id>
 			<name>NutzCN snapshot repository</name>
-			<url>http://maven.nutz.cn/nexus/content/repositories/snapshots</url>
+			<url>https://jfrog.nutz.cn/artifactory/snapshots</url>
 		</snapshotRepository>
 
 		<repository>

@@ -1,7 +1,7 @@
 Nutz集成Dubbo的插件
 ======================
 
-简介(可用性:试用)
+简介(可用性:生产,维护者:wendal)
 ==================================
 
 兼容原生dubbo配置文件
@@ -124,3 +124,94 @@ public class DubboClientTest {
 }
 ```
 
+服务器端示例
+--------------------------------------------------
+
+接口及其实现类 
+
+```java
+package net.wendal.nutzbook.service;
+
+public interface DubboWayService {
+
+    String redisSet(String key, String value);
+    
+    String redisGet(String key);
+
+    String hi(String name);
+
+}
+
+@IocBean(name="dubboWayService")
+public class DubboWayServiceImpl {
+
+	@Inject
+	JedisAgent jedisAgent;
+    pubic String redisSet(String key, String value) {
+        try (Jedis jedis = jedisAgent.getResource()){
+        	return jedis.set(key, value);
+        }
+    };
+    
+    public String redisGet(String key) {
+    	try (Jedis jedis = jedisAgent.getResource()){
+        	return jedis.get(key);
+        }
+    };
+
+    public String hi(String name) {
+    	return "hi," + name;
+    };
+
+}
+```
+
+新建一个配置文件 dubbo-server.xml, 使用dubbo原生配置
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans        http://www.springframework.org/schema/beans/spring-beans.xsd        http://code.alibabatech.com/schema/dubbo        http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+ 
+    <dubbo:application name="nutzcn-server"  />
+ 
+    <dubbo:registry address="multicast://224.5.6.7:1234" />
+ 
+    <dubbo:protocol name="dubbo" port="20880" />
+ 
+    <!-- ref对应bean的name属性 -->
+    <!-- 但id不能与ref相同 -->
+    <dubbo:service id="dubboWayService_server" interface="net.wendal.nutzbook.service.DubboWayService" ref="dubboWayService"/>
+ 
+</beans>
+```
+
+在MainModule的IocBy添加引用, 跟客户端的区别只是配置文件的名字不一样
+
+```java
+	@IocBy(type=ComboIocProvider.class, args={"*js", "ioc/",
+										   "*anno", "net.wendal.nutzbook",
+										   "*dubbo", "dubbo-server.xml"})
+```
+
+然后,在MainSetup或其他实现了Setup接口的init方法内启动服务
+
+```
+public class MainSetup implements Setup {
+	public void init(NutConfig nc) {
+		Ioc ioc = nc.getIoc();
+		ioc.get(DubboManager.class);
+	}
+}
+```
+
+基于注解的扫描
+-----------------------------------------------------------
+
+与官方写法一样, 声明一下需要扫描的package, 即可使用@Reference和@Service注解
+
+```xml
+<dubbo:annotation package="com.foo.bar.service" />
+```

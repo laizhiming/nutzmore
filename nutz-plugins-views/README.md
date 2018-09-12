@@ -12,7 +12,7 @@ freemarker/velocity/thymeleaf/pdf 视图插件
 1. 在 MainModule 中增加 `@Views(FreemarkerViewMaker.class)`
 1. 如需自定义模板相关内容，请复制一份 freemarker.js 到/ioc 目录下，并修改相应内容
 
-```
+```js
 var ioc = {
     currentTime : {
         type : "org.nutz.plugins.view.freemarker.directive.CurrentTimeDirective"
@@ -46,7 +46,7 @@ var ioc = {
 
 如自定义标签加载 请在js中添加
 
-```
+```js
 mapTags : {
 	factory : "$freeMarkerConfigurer#addTags",
 	args : [ {
@@ -71,7 +71,7 @@ mapTags : {
 这样可以在模板中直接调用标签
 `<@currentTime /> ${rekoe} ${conf['emai.to']} ${abc}`
 
-## thymeleaf 视图使用方法（现已支持 `thymeleaf 3.0.0.RELEASE` 版本，并自带 `thymeleaf-layout-dialect 2.0.1`）：
+## thymeleaf 视图使用方法（现已支持 `thymeleaf 3.0.9.RELEASE` 版本，并自带 `thymeleaf-layout-dialect 2.3.0`）：
 
 1. 在 MainModule 的 `@IocBy` 中增加 "*org.nutz.plugins.view.freemarker.ThymeleafIocLoader"
 2. 在 MainModule 中增加 `@Views(ThymeleafViewMaker.class)`
@@ -118,25 +118,38 @@ var ioc = {
 	<artifactId>nutz-plugins-views</artifactId>
 	<version>${nutz.plugins.version}</version>
 </dependency>
+<dependency>
+    <groupId>org.apache.velocity</groupId>
+    <artifactId>velocity</artifactId>
+    <version>1.7</version>
+</dependency>
+<dependency>
+    <groupId>org.apache.velocity</groupId>
+    <artifactId>velocity-tools</artifactId>
+    <version>2.0</version>
+</dependency>
 ```
 
 + 主模块配置
 
-``` java?linenums
+```java?linenums
 @Views({ VelocityViewMaker.class })
+public class MainModule {
+
+}
 ```
 
 + classpath配置
 
 在classpath下增加 velocity.properties内容如下:
 
-``` java?linenums
+```java?linenums
 #资源加载器或加载器别名
 resource.loader = webapp
 #资源加载器类全限定名    
 webapp.resource.loader.class = org.apache.velocity.tools.view.WebappResourceLoader  
 #资源位置
-webapp.resource.loader.path=/WEB-INF/templates/
+webapp.resource.loader.path=/WEB-INF/
 #编码
 input.encoding=UTF-8  
 output.encoding=UTF-8 
@@ -159,10 +172,77 @@ nutz的filter或者servlet加上初始化参数
 </init-param>
 ```
 
-+ 使用模板
++ 使用方法
 
+User类
+```java?linenums
+public class User {
+    public int roleId;
+    public String userName;
+
+    public int getRoleId() {
+        return roleId;
+    }
+
+    public void setRoleId(int roleId) {
+        this.roleId = roleId;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+}
+```
+
+MVC类
 ``` java?linenums
-@Ok("vm:pages/bill/list.html")
+@At("/")
+@Ok("vm:/tmpl/main.vm")
+public User main() {
+    User user = new User();
+    user.setUserName("nutz");
+    user.setRoleId(0);
+    return user;
+}
+```
+
+main.vm文件
+``` html?linenums
+#if($!{obj.roleId} == 0)
+<li> 管理员 $!{obj.userName}</li>
+#else
+<li> 编辑 $!{obj.userName}</li>
+#end
+```
++ 更灵活的使用方法
+
+MVC类
+```java?linenums
+@At("/")
+@Ok("vm:/tmpl/main.vm")
+public NutMap main() {
+    NutMap map = new NutMap();
+    map.put("site_name", "Nutz工具箱");
+    User user = new User();
+    user.setRoleId(0);
+    user.setUserName("nutz");
+    map.put("user", user);
+    return map;
+}
+```
+
+main.vm文件
+```html?linenums
+<span> 站点名称：$!{obj.site_name}</span>
+#if($!{obj.user.roleId} == 0)
+<li> 管理员 $!{obj.user.userName}</li>
+#else
+<li> 编辑 $!{obj.user.userName}</li>
+#end
 ```
 
 + 扩展工具
@@ -232,4 +312,7 @@ nutz的filter或者servlet加上初始化参数
 </tools>
 ```
 
+## 验证码视图
+
+请查验 http://nutz-captcha.mydoc.io
 

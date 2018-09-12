@@ -1,15 +1,17 @@
 package org.nutz.plugins.nop.client;
 
+import org.nutz.http.Header;
 import org.nutz.http.Request;
+import org.nutz.http.Request.METHOD;
+import org.nutz.http.Response;
 import org.nutz.http.Sender;
-import org.nutz.json.Json;
+import org.nutz.lang.Strings;
 import org.nutz.lang.Times;
-import org.nutz.lang.util.NutMap;
+import org.nutz.lang.random.R;
+import org.nutz.log.Log;
+import org.nutz.log.Logs;
 import org.nutz.plugins.nop.NOPConfig;
-import org.nutz.plugins.nop.core.NOPRequest;
-import org.nutz.plugins.nop.core.NOPResponse;
-import org.nutz.plugins.nop.core.sign.NOPSigner;
-import org.nutz.plugins.nop.core.sign.Signer;
+import org.nutz.plugins.nop.core.sign.DigestSigner;
 
 /**
  * @author Kerbores(kerbores@gmail.com)
@@ -28,19 +30,18 @@ public class NOPClient {
 	private String appKey;
 	private String appSecret;
 	private String endpoint;// 调用点
+	private String digestName;
 
-	private Signer signer = new NOPSigner();
+	public String getDigestName() {
+		return digestName;
+	}
+
+	public void setDigestName(String digestName) {
+		this.digestName = digestName;
+	}
 
 	public String getAppKey() {
 		return appKey;
-	}
-
-	public Signer getSigner() {
-		return signer;
-	}
-
-	public void setSigner(Signer signer) {
-		this.signer = signer;
 	}
 
 	public void setAppKey(String appKey) {
@@ -66,27 +67,64 @@ public class NOPClient {
 	private NOPClient() {
 	}
 
-	public static NOPClient create(String appKey, String appSecret, String endpoint) {
+	Log log = Logs.get();
+
+	public static NOPClient create(String appKey, String appSecret, String endpoint, String digestName) {
 		NOPClient client = new NOPClient();
 		client.setAppKey(appKey);
 		client.setAppSecret(appSecret);
 		client.setEndpoint(endpoint);
+		client.setDigestName(digestName);
 		return client;
 	}
 
-	public NOPResponse send(NOPRequest request) {
-		request.getHeader().set(NOPConfig.tskey(), Times.now().getTime() + "");// 添加时间戳
-		request.getHeader().set(NOPConfig.methodKey(), request.getService());// 添加请求方法
-		String sign = signer.sign(appKey, appSecret, request);
+	public Request toRequest(NOPRequest request) {
+		Request req = Request.create(endpoint, request.getMethod());
+		req.setParams(request.getParams());
+		req.setData(request.getData());
+		req.setHeader(signHeader(request));
+		Header header = req.getHeader();
+		log.debugf("send headers %s", header);
+		return req;
+	}
 
-		request.getHeader().set(NOPConfig.signkey(), sign);
-		request.getHeader().set(NOPConfig.signerKey(), signer.name());
-		request.getHeader().set(NOPConfig.appkeyKey(), appKey);// appKey
-		request.getHeader().set(NOPConfig.appSecretKey(), appSecret);// appSecret
+	/**
+	 * 发送请求
+	 * 
+	 * @param request
+	 * @return
+	 */
+	public Response send(NOPRequest request) {
+		return Sender.create(toRequest(request)).send();
+	}
 
-		Request req = Request.create(endpoint, request.getMethod(), NutMap.NEW(), request.getHeader()).setData(Json.toJson(request.getParams()));
-
-		Sender sender = Sender.create(req);
-		return NOPResponse.warp(sender.send());
+	/**
+	 * 处理header
+	 * 
+	 * @param request
+	 * @return
+	 */
+	private Header signHeader(NOPRequest request) {
+		String nonce = R.UU16();
+		String ts = Times.now().getTime() + "";
+		Header header = null;
+		if (request.getMethod() == METHOD.GET) {
+			String query = request.getURLEncodedParams();
+			String method = Strings.isBlank(query) ? request.getGateway() : request.getGateway() + "?" + query;
+			header = request.getHeader()
+					.set(NOPConfig.appkeyKey, appKey)
+					.set(NOPConfig.methodKey, method)
+					.set(NOPConfig.nonceKey, nonce)
+					.set(NOPConfig.tsKey, ts)
+					.set(NOPConfig.signKey, new DigestSigner(digestName).sign(appSecret, ts, method, nonce, request));
+		} else {
+			header = request.getHeader()
+					.set(NOPConfig.appkeyKey, appKey)
+					.set(NOPConfig.methodKey, request.getGateway())
+					.set(NOPConfig.nonceKey, nonce)
+					.set(NOPConfig.tsKey, ts)
+					.set(NOPConfig.signKey, new DigestSigner(digestName).sign(appSecret, ts, request.getGateway(), nonce, request));
+		}
+		return request.getData() == null || request.getData().length == 0 ? header.asFormContentType() : header.asJsonContentType();
 	}
 }

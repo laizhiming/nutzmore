@@ -19,54 +19,59 @@ import nz.net.ultraq.thymeleaf.LayoutDialect;
 
 public class ThymeleafView extends AbstractPathView {
 
-    private static final Log log = Logs.get();
+	private static final Log log = Logs.get();
 
-    private ThymeleafProperties properties;
+	private TemplateEngine templateEngine = new TemplateEngine();
 
-    public ThymeleafView(ThymeleafProperties properties, String path) {
-        super(path);
-        this.properties = properties;
-    }
+	private String contentType;
 
-    @Override
-    public void render(HttpServletRequest request, HttpServletResponse response, Object value) throws Exception {
-        String path = evalPath(request, value);
-        response.setContentType(properties.getContentType() + "; charset=" + properties.getEncoding());
-        response.setCharacterEncoding(properties.getEncoding());
-        try {
-            org.nutz.lang.util.Context ctx = super.createContext(request, value);
-            WebContext context = new WebContext(request,
-                                                response,
-                                                Mvcs.getServletContext(),
-                                                Locale.getDefault(),
-                                                ctx.getInnerMap());
-            TemplateEngine templateEngine = new TemplateEngine();
-            templateEngine.setTemplateResolver(initializeTemplateResolver(properties));
-            templateEngine.addDialect(new LayoutDialect());
-            IDialect[] dialects = properties.getDialects();
-            if (null != dialects) {
-                for (IDialect dialect : dialects) {
-                    templateEngine.addDialect(dialect);
-                }
-            }
-            templateEngine.process(path, context, response.getWriter());
-        }
-        catch (Exception e) {
-            log.error("模板引擎错误", e);
-            throw e;
-        }
-    }
+	private String encoding;
 
-    private ITemplateResolver initializeTemplateResolver(ThymeleafProperties properties) {
-        ServletContextTemplateResolver templateResolver = new ServletContextTemplateResolver(Mvcs.getServletContext());
+	public ThymeleafView(ThymeleafProperties properties, String path) {
+		super(path);
+		templateEngine.setTemplateResolver(initializeTemplateResolver(properties));
 
-        templateResolver.setTemplateMode(properties.getMode());
-        templateResolver.setPrefix(properties.getPrefix());
-        templateResolver.setSuffix(properties.getSuffix());
-        templateResolver.setCharacterEncoding(properties.getEncoding());
-        templateResolver.setCacheable(properties.isCache());
-        templateResolver.setCacheTTLMs(properties.getCacheTTLMs());
+		templateEngine.addDialect(new LayoutDialect());
+		IDialect[] dialects = properties.getDialects();
+		if (null != dialects) {
+			for (IDialect dialect : dialects) {
+				templateEngine.addDialect(dialect);
+			}
+		}
 
-        return templateResolver;
-    }
+		encoding = properties.getEncoding();
+		contentType = properties.getContentType() + "; charset=" + encoding;
+	}
+
+	@Override
+	public void render(HttpServletRequest request, HttpServletResponse response, Object value) throws Exception {
+		String path = evalPath(request, value);
+		response.setContentType(contentType);
+		response.setCharacterEncoding(encoding);
+		try {
+			org.nutz.lang.util.Context ctx = createContext(request, value);
+			WebContext context = new WebContext(request,
+					response,
+					Mvcs.getServletContext(),
+					Locale.getDefault(),
+					ctx.getInnerMap());
+			templateEngine.process(path, context, response.getWriter());
+		} catch (Exception e) {
+			log.error("模板引擎错误", e);
+			throw e;
+		}
+	}
+
+	private ITemplateResolver initializeTemplateResolver(ThymeleafProperties properties) {
+		ServletContextTemplateResolver templateResolver = new ServletContextTemplateResolver(Mvcs.getServletContext());
+
+		templateResolver.setTemplateMode(properties.getMode());
+		templateResolver.setPrefix(properties.getPrefix());
+		templateResolver.setSuffix(properties.getSuffix());
+		templateResolver.setCharacterEncoding(properties.getEncoding());
+		templateResolver.setCacheable(properties.isCache());
+		templateResolver.setCacheTTLMs(properties.getCacheTTLMs());
+
+		return templateResolver;
+	}
 }

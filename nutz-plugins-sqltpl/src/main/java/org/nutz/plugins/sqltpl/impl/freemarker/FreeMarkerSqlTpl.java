@@ -6,6 +6,7 @@ import java.io.StringWriter;
 import java.util.Map;
 
 import org.nutz.dao.sql.Sql;
+import org.nutz.plugins.sqltpl.NutSqlTpl;
 import org.nutz.plugins.sqltpl.VarSetMap;
 
 import freemarker.template.Configuration;
@@ -15,11 +16,17 @@ import freemarker.template.TemplateExceptionHandler;
 
 /**
  * FreeMarker版SqlTpl实现
- * 
+ *
  * @author wendal(wendal1985@gmail.com)
  *
  */
-public class FreeMarkerSqlTpl {
+public class FreeMarkerSqlTpl extends NutSqlTpl {
+
+    private static final long serialVersionUID = 1L;
+
+    public FreeMarkerSqlTpl(String source) {
+        super(source);
+    }
 
     /**
      * 自定义Configuration
@@ -28,7 +35,7 @@ public class FreeMarkerSqlTpl {
 
     /**
      * 渲染一个Sql对象
-     * 
+     *
      * @param sql
      *            需要渲染的Sql实例
      * @return 原对象,用于链式调用
@@ -52,12 +59,12 @@ public class FreeMarkerSqlTpl {
 
     /**
      * 获取Configuration
-     * 
+     *
      * @return Configuration实例,如果没有自定义的,就生成一个默认的
      */
     public static Configuration cfg() {
         if (cfg == null) {
-            Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+            Configuration cfg = new Configuration(Configuration.VERSION_2_3_26);
             cfg.setDefaultEncoding("UTF-8");
             cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
             FreeMarkerSqlTpl.cfg = cfg;
@@ -67,11 +74,16 @@ public class FreeMarkerSqlTpl {
 
     /**
      * 设置Configuration
-     * 
+     *
      * @param cfg
      *            自定义Configuration
      */
     public static void setConfiguration(Configuration cfg) {
         FreeMarkerSqlTpl.cfg = cfg;
+    }
+
+    @Override
+    protected void render() {
+        c(this);
     }
 }

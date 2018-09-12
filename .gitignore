@@ -1,4 +1,5 @@
 *.class
+.DS_Store
 
 # Package Files #
 *.jar
@@ -11,6 +12,9 @@ target/
 .settings/
 .classpath
 .project/
+.factorypath
+.apt_generated
 
 .idea
 *.iml
+*versionsBackup

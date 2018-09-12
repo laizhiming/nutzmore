@@ -15,7 +15,6 @@ import org.nutz.mvc.NutConfig;
 import org.nutz.mvc.NutServlet;
 
 @Ignore
-@SuppressWarnings("deprecation")
 public abstract class AbstractMvcTest extends NutIocTestBase {
 
 	protected Servlet servlet;
@@ -41,10 +40,10 @@ public abstract class AbstractMvcTest extends NutIocTestBase {
 		servlet = new NutServlet();
 		servlet.init(servletConfig);
 		session = Mock.servlet.session(servletContext);
-		newreq();
 		nc = Mvcs.getNutConfig();
 		ioc = nc.getIoc();
 		injectSelfFields();
+		newreq();
 		_before();
 	}
 

@@ -1,7 +1,7 @@
 Nutz集成AutoLoadCache的插件
 ======================
 
-简介(可用性:生产)
+简介(可用性:生产,维护者:Rekoe)
 ==================================
 
 深度集成AutoLoadCache
@@ -14,11 +14,12 @@ Nutz集成AutoLoadCache的插件
 
 示例IocBy配置
 ----------------------------------------------
-
+```java
 	@IocBy(type=ComboIocProvider.class, args={"*js", "ioc/",
 										   "*anno", "net.wendal.nutzbook",
 										   "*org.nutz.integration.autoloadcache.AutoLoadCacheIocLoader"})
-										   
+										   								   
+```
 
 redis-pool.js文件配置的爲Redis的緩存
 若需要使用内存模式请修改加载类 
@@ -28,7 +29,7 @@ com.jarvis.cache.redis.ShardedCachePointCut 为  com.jarvis.cache.map.CachePoint
 
 ```
 
-```
+```js
 var ioc = {
 	jedisPoolConfig : {
 		type : "redis.clients.jedis.JedisPoolConfig",
@@ -63,24 +64,27 @@ var ioc = {
 			autoLoadPeriod : 50
 		}
 	},
-	hessianSerializer : {
-		type : "com.jarvis.cache.serializer.HessianSerializer"
+	fastjsonSerializer : {
+		type : "com.jarvis.cache.serializer.FastjsonSerializer"
 	},
+	scriptParser : {
+        type : "com.jarvis.cache.script.OgnlParser"
+    },
 	cachePointCut : {
-		type : "com.jarvis.cache.redis.ShardedCachePointCut",
+		type : "com.jarvis.cache.map.CachePointCut",
 		args : [ {
-			refer : "autoLoadConfig"
-		} ],
+			refer : "autoLoadConfig",
+		},{
+		  refer : "fastjsonSerializer"
+		} ,{
+          refer : "scriptParser"
+        }],
 		fields : {
-			serializer : {
-				refer : "hessianSerializer"
-			},
-			shardedJedisPool : {
-				refer : "shardedJedisPool"
-			},
-			namespace : 'test_hessian'
+			namespace : 'test_hessian',
+			needPersist : false
 		},
 		events : {
+		    create : "start",
 			depose : "destroy"
 		}
 	}
@@ -91,7 +95,7 @@ var ioc = {
 
 示例来至nutzbook
 
-```
+```js
 var ioc = {
 		conf : {
 			type : "org.nutz.ioc.impl.PropertiesProxy",
@@ -133,7 +137,7 @@ https://github.com/qiujiayu/AutoLoadCache
 	
 后台管理cache入口 需要在web.xml中增加
 
-```
+```xml
 <servlet>
 		<servlet-name>cacheadmin</servlet-name>
 		<servlet-class>com.jarvis.cache.admin.servlet.AdminServlet</servlet-class>
@@ -148,5 +152,6 @@ https://github.com/qiujiayu/AutoLoadCache
 		<url-pattern>/cacheadmin</url-pattern>
 	</servlet-mapping>
 ```
-账号：admin
-密码：admin
+
+* 账号：admin
+* 密码：admin

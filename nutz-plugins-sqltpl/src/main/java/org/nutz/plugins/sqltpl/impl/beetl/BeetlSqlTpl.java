@@ -5,8 +5,8 @@ import java.io.IOException;
 import org.beetl.core.Configuration;
 import org.beetl.core.GroupTemplate;
 import org.beetl.core.Template;
-import org.beetl.core.resource.StringTemplateResourceLoader;
 import org.nutz.dao.sql.Sql;
+import org.nutz.plugins.sqltpl.NutSqlTpl;
 import org.nutz.plugins.sqltpl.VarSetMap;
 
 /**
@@ -15,7 +15,13 @@ import org.nutz.plugins.sqltpl.VarSetMap;
  * @author wendal(wendal1985@gmail.com)
  *
  */
-public class BeetlSqlTpl {
+public class BeetlSqlTpl extends NutSqlTpl {
+
+    private static final long serialVersionUID = 1L;
+
+    public BeetlSqlTpl(String source) {
+        super(source);
+    }
 
     /**
      * 自定义GroupTemplate
@@ -55,7 +61,7 @@ public class BeetlSqlTpl {
      */
     public static GroupTemplate gt() {
         if (gt == null) {
-            StringTemplateResourceLoader resourceLoader = new StringTemplateResourceLoader();
+            ClasspathStringResourceLoader resourceLoader = new ClasspathStringResourceLoader();
             Configuration cfg;
             try {
                 cfg = Configuration.defaultConfiguration();
@@ -66,5 +72,9 @@ public class BeetlSqlTpl {
             gt = new GroupTemplate(resourceLoader, cfg);
         }
         return gt;
+    }
+
+    protected void render() {
+        c(this);
     }
 }

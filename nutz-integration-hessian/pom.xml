@@ -4,10 +4,10 @@
 	<parent>
 		<groupId>org.nutz</groupId>
 		<artifactId>nutzmore</artifactId>
-		<version>1.r.59-SNAPSHOT</version>
+		<version>1.r.67-SNAPSHOT</version>
 	</parent>
 	<artifactId>nutz-integration-hessian</artifactId>
-	<url>http://nutzam.com</url>
+	<url>https://nutzam.com</url>
 	<issueManagement>
 		<system>Github Issue</system>
 		<url>http://github.com/nutzam/nutzmore/issues</url>
@@ -97,7 +97,7 @@
 		<snapshotRepository>
 			<id>nutzcn-snapshots</id>
 			<name>NutzCN snapshot repository</name>
-			<url>http://maven.nutz.cn/nexus/content/repositories/snapshots</url>
+			<url>https://jfrog.nutz.cn/artifactory/snapshots</url>
 		</snapshotRepository>
 
 		<repository>

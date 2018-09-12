@@ -1,7 +1,7 @@
 Nutz的Dao层插件
 ==================================
 
-简介(可用性:生产)
+简介(可用性:生产,维护者:wendal)
 ==================================
 
 为NutDao提供缓存支持,SQL级别的缓存
@@ -49,7 +49,7 @@ Nutz的Dao层插件
 			}
 		},
 		cacheExecutor : {
-			type : "org.nutz.plugins.cache.dao.CachedNutDaoExecutor",
+			type : "org.nutz.plugins.cache.dao.DaoCacheInterceptor",
 			fields : {
 				cacheProvider : {refer:"cacheProvider"},
 				cachedTableNames : ["tb_user", "tb_user_profile"], // 需要缓存的表
@@ -77,7 +77,7 @@ Ehcache示例配置
 
 为shiro和daocache分配不同的CacheManager实例是完全可以,请注意区分场景!!
 
-```
+```js
 var ioc = {
 		cacheManager : {
 			type : "net.sf.ehcache.CacheManager",
@@ -96,7 +96,7 @@ var ioc = {
 
 第二个是dao.js, 区别只是cacheProvider指向的类不一样
 
-```
+```js
 var ioc = {
 		conf : {
 			type : "org.nutz.ioc.impl.PropertiesProxy",
@@ -130,7 +130,7 @@ var ioc = {
 			}
 		},
 		cacheExecutor : {
-			type : "org.nutz.plugins.cache.dao.CachedNutDaoExecutor",
+			type : "org.nutz.plugins.cache.dao.DaoCacheInterceptor", // 1.r.57.r3及以下版本用 CachedNutDaoExecutor
 			fields : {
 				cacheProvider : {refer:"cacheProvider"},
 				cachedTableNames : [
@@ -156,3 +156,20 @@ var ioc = {
 
 有用户反映ehcache在shiro.ini的配置顺序会导致获取到CacheManager为null,请确保
 ehcache的声明在其他所有realm声明之前
+
+## 使用redis
+
+dao.js中的cacheProvider变更一下
+
+```js
+		// 基于Ehcache的DaoCacheProvider
+		cacheProvider : {
+			type : "org.nutz.plugins.cache.dao.impl.provider.RedisDaoCacheProvider",
+			fields : {
+				jedisPool : {refer:"jedisPool"} // 引用nutz-integration-jedis的JedisPool
+			},
+			events : {
+				create : "init"
+			}
+		}
+```
