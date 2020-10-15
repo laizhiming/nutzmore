@@ -24,32 +24,32 @@ import org.springframework.context.support.ApplicationObjectSupport;
 @EnableConfigurationProperties(SqlManagerProperties.class)
 public class SqlManagerAutoConfiguration extends ApplicationObjectSupport {
 
-	Log log = Logs.get();
+    Log log = Logs.get();
 
-	@Autowired
-	private SqlManagerProperties sqlManagerProperties;
+    @Autowired
+    private SqlManagerProperties sqlManagerProperties;
 
-	@Autowired
-	private SpringResourceLoaction loaction;
+    @Autowired
+    private SpringResourceLoaction loaction;
 
-	@PostConstruct
-	public void init() {// 初始化一下nutz的扫描
-		Scans.me().addResourceLocation(loaction);
-	}
+    @PostConstruct
+    public void init() {// 初始化一下nutz的扫描
+        Scans.me().addResourceLocation(loaction);
+    }
 
-	@Bean
-	public SpringResourceLoaction springResourceLoaction() {
-		return new SpringResourceLoaction();
-	}
+    @Bean
+    public SpringResourceLoaction springResourceLoaction() {
+        return new SpringResourceLoaction();
+    }
 
-	@Bean
-	@ConditionalOnMissingBean
-	public SqlManager sqlManager() {
-		String[] paths = sqlManagerProperties.getPaths();
-		if (paths == null) {
-			paths = new String[] { "sqls" };
-		}
-		return sqlManagerProperties.getMode() == Mode.XML ? new XmlSqlManager(paths) : new FileSqlManager(paths);
-	}
+    @Bean
+    @ConditionalOnMissingBean
+    public SqlManager sqlManager() {
+        String[] paths = sqlManagerProperties.getPaths();
+        if (paths == null) {
+            paths = new String[]{"sqls"};
+        }
+        return sqlManagerProperties.getMode() == Mode.XML ? new XmlSqlManager(paths) : new FileSqlManager(paths);
+    }
 
 }

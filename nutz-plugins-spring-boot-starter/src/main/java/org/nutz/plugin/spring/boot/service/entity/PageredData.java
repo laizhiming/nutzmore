@@ -6,60 +6,72 @@ import java.util.Map;
 
 import org.nutz.dao.pager.Pager;
 
-public class PageredData<T> {
+/**
+ * 
+ * @author kerbores(kerbores@gmail.com)
+ */
+public class PageredData<T> extends Pager {
 
-	/**
-	 * 分页信息
-	 */
-	private Pager pager;
+    private static final long serialVersionUID = 1L;
 
-	/**
-	 * 分页参数(带有一堆参数的分页)
-	 */
-	private Map<String, Object> paras;
+    /**
+     * 分页参数(带有一堆参数的分页)
+     */
+    private Map<String, Object> paras;
 
-	/**
-	 * 数据列表
-	 */
-	private List<T> dataList;
+    /**
+     * 数据列表
+     */
+    private List<T> dataList;
 
-	public Pager getPager() {
-		return pager;
-	}
+    /**
+     * @param page
+     * @param pageSize
+     */
+    public PageredData(int page, int pageSize) {
+        super(page, pageSize);
+    }
 
-	public void setPager(Pager pager) {
-		this.pager = pager;
-	}
+    public Pager getPager() {
+        return this;
+    }
 
-	public List<T> getDataList() {
-		return dataList;
-	}
+    @Deprecated
+    public void setPager(Pager pager) {
+        setPageNumber(pager.getPageNumber());
+        setPageSize(pager.getPageSize());
+        setRecordCount(pager.getRecordCount());
+    }
 
-	public void setDataList(List<T> dataList) {
-		this.dataList = dataList;
-	}
+    public List<T> getDataList() {
+        return dataList;
+    }
 
-	/**
-	 * @return the paras
-	 */
-	public Map<String, Object> getParas() {
-		return paras;
-	}
+    public void setDataList(List<T> dataList) {
+        this.dataList = dataList;
+    }
 
-	/**
-	 * @param paras
-	 *            the paras to set 设置分页查询参数一些查询的筛选条件 按照mvc参数key-value的形式
-	 */
-	public void setParas(Map<String, Object> paras) {
-		this.paras = paras;
-	}
+    /**
+     * @return the paras
+     */
+    public Map<String, Object> getParas() {
+        return paras;
+    }
 
-	public PageredData<T> addParam(String key, Object value) {
-		if (this.paras == null) {
-			this.paras = new HashMap<>();
-		}
-		this.paras.put(key, value);
-		return this;
-	}
+    /**
+     * @param paras
+     *            the paras to set 设置分页查询参数一些查询的筛选条件 按照mvc参数key-value的形式
+     */
+    public void setParas(Map<String, Object> paras) {
+        this.paras = paras;
+    }
+
+    public PageredData<T> addParam(String key, Object value) {
+        if (this.paras == null) {
+            this.paras = new HashMap<>();
+        }
+        this.paras.put(key, value);
+        return this;
+    }
 
 }

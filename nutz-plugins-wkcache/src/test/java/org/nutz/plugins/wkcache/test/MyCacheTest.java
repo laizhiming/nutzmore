@@ -1,6 +1,7 @@
 package org.nutz.plugins.wkcache.test;
 
 import org.nutz.ioc.loader.annotation.IocBean;
+import org.nutz.lang.Times;
 import org.nutz.plugins.wkcache.annotation.*;
 
 import java.util.List;
@@ -8,15 +9,15 @@ import java.util.List;
 /**
  * Created by wizzer on 2017/6/14.
  */
-@CacheDefaults(cacheName = "nutzwk_cache",cacheLiveTime = 3000)
+@CacheDefaults(cacheName = "nutzwk_cache", cacheLiveTime = 3000)
 @IocBean
 public class MyCacheTest {
-    @CacheResult(cacheName = "cache_time_1",cacheKey = "test")
+    @CacheResult(cacheName = "cache_time_1", cacheKey = "test")
     public Object cache_time_1(String txt) {
         return txt;
     }
 
-    @CacheResult(cacheName = "cache_time_2",cacheKey = "test")
+    @CacheResult(cacheName = "cache_time_2", cacheKey = "test")
     public Object cache_time_2(String txt) {
         return txt;
     }
@@ -31,7 +32,7 @@ public class MyCacheTest {
         return txt;
     }
 
-    @CacheResult(cacheKey = "${args[0].id}_${args[0].name}")
+    @CacheResult(cacheKey = "${test.id}_${test.name}")
     public Object testCacheObj(TestBean test) {
         System.out.println("我被执行了...");
         return test;
@@ -61,5 +62,31 @@ public class MyCacheTest {
     @CacheRemoveAll()
     public void testRemoveAll() {
 
+    }
+
+    @CacheResult(cacheKey = "null")
+    public Object testCacheNull(boolean isNull) {
+        if (isNull) {
+            return null;
+        }
+        return 1;
+    }
+
+    @CacheResult(cacheKey = "ignoreNull", ignoreNull = true)
+    public Object testCacheIgnoreNull(boolean isNull) {
+        if (isNull) {
+            return null;
+        }
+        return 1;
+    }
+
+
+    @CacheResult(cacheKey = "${args[0]}")
+    public String testCacheFlag(String txt, int flag) {
+        return txt + "_" + flag;
+    }
+
+    @CacheRemove(cacheKey = "${key}")
+    public void testRemoveMulKey(String key) {
     }
 }

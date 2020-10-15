@@ -7,17 +7,20 @@ import org.nutz.lang.Lang;
 import org.nutz.lang.Strings;
 import org.nutz.lang.segment.CharSegment;
 import org.nutz.lang.util.Context;
+import org.nutz.lang.util.MethodParamNamesScaner;
 import org.nutz.plugins.wkcache.annotation.CacheDefaults;
 import org.nutz.plugins.wkcache.annotation.CacheRemove;
+import redis.clients.jedis.ScanParams;
+import redis.clients.jedis.ScanResult;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.Set;
+import java.util.List;
 
 /**
  * Created by wizzer on 2017/6/14.
  */
-@IocBean
+@IocBean(singleton = false)
 public class WkcacheRemoveEntryInterceptor extends AbstractWkcacheInterceptor {
 
     public void filter(InterceptorChain chain) throws Throwable {
@@ -35,7 +38,14 @@ public class WkcacheRemoveEntryInterceptor extends AbstractWkcacheInterceptor {
             this.key = new CharSegment(cacheKey);
             if (key.hasKey()) {
                 Context ctx = Lang.context();
-                ctx.set("args", chain.getArgs());
+                Object[] args = chain.getArgs();
+                List<String> names = MethodParamNamesScaner.getParamNames(method);//不支持nutz低于1.60的版本
+                if (names != null) {
+                    for (int i = 0; i < names.size() && i < args.length; i++) {
+                        ctx.set(names.get(i), args[i]);
+                    }
+                }
+                ctx.set("args", args);
                 Context _ctx = Lang.context();
                 for (String key : key.keys()) {
                     _ctx.set(key, new El(key).eval(ctx));
@@ -51,12 +61,20 @@ public class WkcacheRemoveEntryInterceptor extends AbstractWkcacheInterceptor {
             cacheName = cacheDefaults != null ? cacheDefaults.cacheName() : "wk";
         }
         if (cacheKey.endsWith("*")) {
-            Set<byte[]> set = redisService().keys((cacheName + ":" + cacheKey).getBytes());
-            for (byte[] it : set) {
-                redisService().del(it);
-            }
-        } else
+            // 使用 scan 指令来查找所有匹配到的 Key
+            ScanParams match = new ScanParams().match(cacheName + ":" + cacheKey);
+            ScanResult<String> scan = null;
+            do {
+                scan = redisService().scan(scan == null ? ScanParams.SCAN_POINTER_START : scan.getStringCursor(), match);
+                for (String key : scan.getResult()) {
+                    redisService().del(key.getBytes());
+                }
+                // 已经迭代结束了
+            } while (!scan.isCompleteIteration());
+        } else {
             redisService().del((cacheName + ":" + cacheKey).getBytes());
+        }
         chain.doChain();
     }
+
 }
