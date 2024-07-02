@@ -50,7 +50,7 @@
 		<dependency>
 			<groupId>org.mongodb</groupId>
 			<artifactId>mongo-java-driver</artifactId>
-			<version>3.5.0</version>
+			<version>3.12.8</version>
 		</dependency>
 		<dependency>
 			<groupId>org.nutz</groupId>
@@ -125,6 +125,6 @@
 	<parent>
 		<groupId>org.nutz</groupId>
 		<artifactId>nutzmore</artifactId>
-		<version>1.r.68-SNAPSHOT</version>
+		<version>1.r.70-SNAPSHOT</version>
 	</parent>
 </project>

@@ -4,12 +4,14 @@ import org.nutz.aop.InterceptorChain;
 import org.nutz.el.El;
 import org.nutz.ioc.loader.annotation.IocBean;
 import org.nutz.lang.Lang;
+import org.nutz.lang.Streams;
 import org.nutz.lang.Strings;
 import org.nutz.lang.segment.CharSegment;
 import org.nutz.lang.util.Context;
 import org.nutz.lang.util.MethodParamNamesScaner;
 import org.nutz.plugins.wkcache.annotation.CacheDefaults;
 import org.nutz.plugins.wkcache.annotation.CacheUpdate;
+import redis.clients.jedis.Jedis;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -20,48 +22,21 @@ import java.util.List;
  */
 @IocBean(singleton = false)
 public class WkcacheUpdateInterceptor extends AbstractWkcacheInterceptor {
+    private String cacheKeyTemp;
+    private String cacheName;
+    private int liveTime;
+    private boolean isHash;
+    private List<String> paramNames;
 
-    public void filter(InterceptorChain chain) throws Throwable {
-        Method method = chain.getCallingMethod();
-        CacheUpdate cacheResult = method.getAnnotation(CacheUpdate.class);
-        String cacheKey = Strings.sNull(cacheResult.cacheKey());
-        String cacheName = Strings.sNull(cacheResult.cacheName());
-        int liveTime = cacheResult.cacheLiveTime();
-        if (Strings.isBlank(cacheKey)) {
-            cacheKey = method.getDeclaringClass().getName()
-                    + "."
-                    + method.getName()
-                    + "#"
-                    + Arrays.toString(chain.getArgs());
-        } else {
-            this.key = new CharSegment(cacheKey);
-            if (key.hasKey()) {
-                Context ctx = Lang.context();
-                Object[] args = chain.getArgs();
-                List<String> names = MethodParamNamesScaner.getParamNames(method);//不支持nutz低于1.60的版本
-                if (names != null) {
-                    for (int i = 0; i < names.size() && i < args.length; i++) {
-                        ctx.set(names.get(i), args[i]);
-                    }
-                }
-                ctx.set("args", args);
-                Context _ctx = Lang.context();
-                for (String key : key.keys()) {
-                    _ctx.set(key, new El(key).eval(ctx));
-                }
-                cacheKey = key.render(_ctx).toString();
-            } else {
-                cacheKey = key.getOrginalString();
-            }
-        }
+    public void prepare(CacheDefaults cacheDefaults, CacheUpdate cacheUpdate, Method method) {
+    	cacheKeyTemp = Strings.sNull(cacheUpdate.cacheKey());
+        cacheName = Strings.sNull(cacheUpdate.cacheName());
+        liveTime = cacheUpdate.cacheLiveTime();
+        isHash = cacheDefaults != null && cacheDefaults.isHash();
         if (Strings.isBlank(cacheName)) {
-            CacheDefaults cacheDefaults = method.getDeclaringClass()
-                    .getAnnotation(CacheDefaults.class);
             cacheName = cacheDefaults != null ? cacheDefaults.cacheName() : "wk";
         }
         if (liveTime == 0) {
-            CacheDefaults cacheDefaults = method.getDeclaringClass()
-                    .getAnnotation(CacheDefaults.class);
             liveTime = cacheDefaults != null ? cacheDefaults.cacheLiveTime() : 0;
         }
         if (getConf() != null && getConf().size() > 0) {
@@ -69,13 +44,55 @@ public class WkcacheUpdateInterceptor extends AbstractWkcacheInterceptor {
             if (confLiveTime > 0)
                 liveTime = confLiveTime;
         }
+        paramNames = MethodParamNamesScaner.getParamNames(method);
+    }
+
+    public void filter(InterceptorChain chain) throws Throwable {
+    	String cacheKey = cacheKeyTemp;
+        Method method = chain.getCallingMethod();
+        if (Strings.isBlank(cacheKey)) {
+            cacheKey = method.getDeclaringClass().getName()
+                    + "."
+                    + method.getName()
+                    + "#"
+                    + Arrays.toString(chain.getArgs());
+        } else {
+            CharSegment key = new CharSegment(cacheKey);
+            if (key.hasKey()) {
+                Context ctx = Lang.context();
+                Object[] args = chain.getArgs();
+                if (paramNames != null) {
+                    for (int i = 0; i < paramNames.size() && i < args.length; i++) {
+                        ctx.set(paramNames.get(i), args[i]);
+                    }
+                }
+                ctx.set("args", args);
+                Context _ctx = Lang.context();
+                for (String val : key.keys()) {
+                    _ctx.set(val, new El(val).eval(ctx));
+                }
+                cacheKey = key.render(_ctx).toString();
+            } else {
+                cacheKey = key.getOrginalString();
+            }
+        }
         Object obj;
         chain.doChain();
         obj = chain.getReturn();
-        if (liveTime > 0) {
-            redisService().setex((cacheName + ":" + cacheKey).getBytes(), liveTime, Lang.toBytes(obj));
-        } else {
-            redisService().set((cacheName + ":" + cacheKey).getBytes(), Lang.toBytes(obj));
+        Jedis jedis = null;
+        try {
+            jedis = getJedisAgent().jedis();
+            if (isHash) {
+                jedis.hset(cacheName.getBytes(), cacheKey.getBytes(), Lang.toBytes(obj));
+            } else {
+                if (liveTime > 0) {
+                    jedis.setex((cacheName + ":" + cacheKey).getBytes(), liveTime, Lang.toBytes(obj));
+                } else {
+                    jedis.set((cacheName + ":" + cacheKey).getBytes(), Lang.toBytes(obj));
+                }
+            }
+        } finally {
+            Streams.safeClose(jedis);
         }
         chain.setReturnValue(obj);
     }

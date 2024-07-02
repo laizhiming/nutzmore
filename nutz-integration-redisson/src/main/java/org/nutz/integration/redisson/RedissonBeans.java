@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.URL;
+import java.util.List;
 
 import org.nutz.ioc.impl.PropertiesProxy;
 import org.nutz.ioc.loader.annotation.Inject;
@@ -89,27 +90,51 @@ public class RedissonBeans {
             SingleServerConfig ssc = config.useSingleServer();
             ssc.setAddress(conf.get("redisson.single.address", "redis://127.0.0.1:6379"));
             setupBeanByConf(ssc, PRE + "single.");
+            if(Strings.isBlank(conf.get("redisson.single.password"))) {
+                ssc.setPassword(null);
+            }
             break;
         case "masterslave": // 主从
             MasterSlaveServersConfig mssc = config.useMasterSlaveServers();
             mssc.setMasterAddress(conf.check("redisson.masterslave.masterAddress"));
             mssc.addSlaveAddress(Strings.splitIgnoreBlank(conf.check("redisson.masterslave.slaveAddress")));
             setupBeanByConf(mssc, PRE + "masterslave.");
+            if(Strings.isBlank(conf.get("redisson.masterslave.password"))) {
+                mssc.setPassword(null);
+            }
             break;
         case "cluster": // 集群
             ClusterServersConfig csc = config.useClusterServers();
-            csc.addNodeAddress(conf.check("redisson.cluster.nodeAddress"));
+            List<String> clusterList = conf.getList("redisson.cluster.nodeAddress",",");
+            for(String host: clusterList) {
+                csc.addNodeAddress(host);
+            }
             setupBeanByConf(csc, PRE + "cluster.");
+            if(Strings.isBlank(conf.get("redisson.cluster.password"))) {
+                csc.setPassword(null);
+            }
             break;
         case "replicated": // 副本
             ReplicatedServersConfig rsc = config.useReplicatedServers();
-            rsc.addNodeAddress(conf.check("redisson.replicated.nodeAddress"));
+            List<String> replicatedList = conf.getList("redisson.replicated.nodeAddress",",");
+            for(String host: replicatedList) {
+                rsc.addNodeAddress(host);
+            }
             setupBeanByConf(rsc, PRE + "replicated.");
+            if(Strings.isBlank(conf.get("redisson.replicated.password"))) {
+                rsc.setPassword(null);
+            }
             break;
         case "sentinel": // 分片
             SentinelServersConfig ssc2 = config.useSentinelServers();
-            ssc2.addSentinelAddress(conf.check("redisson.sentinel.sentinelAddress"));
+            List<String> sentinelList = conf.getList("redisson.sentinel.sentinelAddress",",");
+            for(String host: sentinelList) {
+                ssc2.addSentinelAddress(host);
+            }
             setupBeanByConf(ssc2, PRE + "sentinel.");
+            if(Strings.isBlank(conf.get("redisson.sentinel.password"))) {
+                ssc2.setPassword(null);
+            }
             break;
         default:
             throw Lang.noImplement();

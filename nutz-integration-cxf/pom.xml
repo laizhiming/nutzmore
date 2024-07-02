@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.nutz</groupId>
 		<artifactId>nutzmore</artifactId>
-		<version>1.r.68-SNAPSHOT</version>
+		<version>1.r.70-SNAPSHOT</version>
 	</parent>
 	<artifactId>nutz-integration-cxf</artifactId>
 
@@ -88,6 +88,12 @@
 			<groupId>org.apache.cxf</groupId>
 			<artifactId>cxf-rt-frontend-jaxws</artifactId>
 			<version>3.1.12</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.jws</groupId>
+			<artifactId>javax.jws-api</artifactId>
+			<version>1.1</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
